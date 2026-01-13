@@ -1,0 +1,29 @@
+{
+  "name": "opencode-python-debugger",
+  "version": "1.0.0",
+  "description": "OpenCode plugin for interactive Python debugging via the Debug Relay Server",
+  "main": "index.ts",
+  "types": "index.ts",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "python",
+    "debugger",
+    "debugging",
+    "dap",
+    "debugpy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/opencode-debugger"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=0.1.0"
+  },
+  "files": [
+    "index.ts",
+    "README.md"
+  ]
+}

@@ -170,6 +170,65 @@ The relay server:
 3. Communicates with debugpy subprocess
 4. Returns results as JSON responses
 
+## OpenCode Integration
+
+This project includes OpenCode agent skill and plugin packages for seamless integration with OpenCode AI coding agents.
+
+### Agent Skill
+
+The skill provides instructions and API documentation for agents to debug Python code.
+
+**Installation:**
+```bash
+# Project-level
+mkdir -p .opencode/skill/python-debug
+cp packages/skill-python-debug/SKILL.md .opencode/skill/python-debug/
+
+# Or global
+mkdir -p ~/.config/opencode/skill/python-debug
+cp packages/skill-python-debug/SKILL.md ~/.config/opencode/skill/python-debug/
+```
+
+### Plugin
+
+The plugin provides custom tools (`debug-*`) that agents can call directly.
+
+**Installation (local):**
+```bash
+# Project-level
+mkdir -p .opencode/plugin
+cp packages/plugin-python-debugger/index.ts .opencode/plugin/python-debugger.ts
+
+# Create package.json for dependencies
+echo '{"dependencies": {"@opencode-ai/plugin": "latest"}}' > .opencode/package.json
+```
+
+**Installation (npm - when published):**
+```json
+{
+  "plugin": ["opencode-python-debugger"]
+}
+```
+
+### Available Tools (Plugin)
+
+| Tool | Description |
+|------|-------------|
+| `debug-session-create` | Create a new debug session |
+| `debug-sessions` | List all active sessions |
+| `debug-launch` | Launch a program in debug mode |
+| `debug-breakpoints` | Set breakpoints in a file |
+| `debug-continue` | Continue execution |
+| `debug-step-over` | Step to next line |
+| `debug-step-into` | Step into function |
+| `debug-step-out` | Step out of function |
+| `debug-status` | Get session state and events |
+| `debug-stacktrace` | Get call stack |
+| `debug-variables` | Get variables in scope |
+| `debug-evaluate` | Evaluate expression |
+| `debug-output` | Get program output |
+| `debug-terminate` | Terminate session |
+
 ## License
 
 MIT License
