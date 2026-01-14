@@ -59,8 +59,8 @@ This project includes its own debugging tools as MCP tools.
    {
      "mcpServers": {
        "python-debugger": {
-         "command": "python",
-         "args": ["-m", "python_debugger_mcp.mcp_server"]
+         "command": "uvx",
+         "args": ["python-debugger-mcp"]
        }
      }
    }
