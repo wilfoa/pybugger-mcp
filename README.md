@@ -1,4 +1,4 @@
-# Python Debugger MCP
+# pybugger-mcp
 
 [![PyPI version](https://img.shields.io/pypi/v/pybugger-mcp)](https://pypi.org/project/pybugger-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,8 +7,8 @@
 
 A Model Context Protocol (MCP) server that enables AI agents to debug Python code interactively. Set breakpoints, step through code, inspect variables, and evaluate expressions - all through natural conversation with your AI assistant.
 
-[![Install in Cursor](https://img.shields.io/badge/Cursor-Install%20MCP-blue?style=for-the-badge&logo=cursor)](https://cursor.com/install-mcp?name=python-debugger&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJweXRob24tZGVidWdnZXItbWNwIl19)
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install%20Server-0098FF?style=for-the-badge&logo=visualstudiocode)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%20%22python-debugger%22%2C%20%22command%22%3A%20%22uvx%22%2C%20%22args%22%3A%20%5B%22pybugger-mcp%22%5D%7D)
+[![Install in Cursor](https://img.shields.io/badge/Cursor-Install%20MCP-blue?style=for-the-badge&logo=cursor)](https://cursor.com/install-mcp?name=pybugger&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJweWJ1Z2dlci1tY3AiXX0=)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install%20Server-0098FF?style=for-the-badge&logo=visualstudiocode)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22pybugger%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22pybugger-mcp%22%5D%7D)
 
 ## Demo
 
