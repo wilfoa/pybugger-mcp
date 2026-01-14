@@ -165,7 +165,9 @@ class Session:
                     await self.adapter.set_exception_breakpoints(["uncaught"])  # type: ignore
 
             await self.adapter.launch(config, configure_callback=configure_breakpoints)
-            await self.transition_to(SessionState.RUNNING)
+            # Only transition to RUNNING if not already PAUSED (breakpoint hit during launch)
+            if self._state == SessionState.LAUNCHING:
+                await self.transition_to(SessionState.RUNNING)
         except Exception:
             await self.transition_to(SessionState.FAILED)
             raise
@@ -185,7 +187,9 @@ class Session:
                     await self.adapter.set_breakpoints(file_path, breakpoints)  # type: ignore
 
             await self.adapter.attach(config, configure_callback=configure_breakpoints)
-            await self.transition_to(SessionState.RUNNING)
+            # Only transition to RUNNING if not already PAUSED (breakpoint hit during attach)
+            if self._state == SessionState.LAUNCHING:
+                await self.transition_to(SessionState.RUNNING)
         except Exception:
             await self.transition_to(SessionState.FAILED)
             raise
