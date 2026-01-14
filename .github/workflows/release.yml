@@ -87,8 +87,8 @@ jobs:
       - name: Publish to PyPI
         if: steps.release.outputs.released == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        # Uses Trusted Publishing - no token needed
+        # Configure at: https://pypi.org/manage/account/publishing/
 
       - name: Publish to GitHub Releases
         if: steps.release.outputs.released == 'true'
