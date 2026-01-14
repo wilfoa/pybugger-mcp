@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, HTTPException
 
-from python_debugger_mcp.api.deps import SessionManagerDep
-from python_debugger_mcp.core.exceptions import SessionLimitError, SessionNotFoundError
-from python_debugger_mcp.models.responses import (
+from pybugger_mcp.api.deps import SessionManagerDep
+from pybugger_mcp.core.exceptions import SessionLimitError, SessionNotFoundError
+from pybugger_mcp.models.responses import (
     RecoverableSessionResponse,
     RecoverableSessionsResponse,
     SessionResponse,

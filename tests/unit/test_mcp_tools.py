@@ -2,9 +2,9 @@
 
 import pytest
 
-import python_debugger_mcp.mcp_server as mcp_server
-from python_debugger_mcp.core.session import SessionManager
-from python_debugger_mcp.mcp_server import (
+import pybugger_mcp.mcp_server as mcp_server
+from pybugger_mcp.core.session import SessionManager
+from pybugger_mcp.mcp_server import (
     _get_manager,
     debug_add_watch,
     debug_clear_breakpoints,
@@ -37,7 +37,7 @@ from python_debugger_mcp.mcp_server import (
 @pytest.fixture
 async def session_manager(tmp_path):
     """Create and start a session manager for testing."""
-    from python_debugger_mcp.persistence.breakpoints import BreakpointStore
+    from pybugger_mcp.persistence.breakpoints import BreakpointStore
 
     breakpoint_store = BreakpointStore(base_dir=tmp_path / "breakpoints")
     manager = SessionManager(breakpoint_store=breakpoint_store)

@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import Depends, Path, Request
 
-from python_debugger_mcp.core.session import Session, SessionManager
+from pybugger_mcp.core.session import Session, SessionManager
 
 
 async def get_session_manager(request: Request) -> SessionManager:

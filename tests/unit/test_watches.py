@@ -2,7 +2,7 @@
 
 import pytest
 
-from python_debugger_mcp.core.session import Session
+from pybugger_mcp.core.session import Session
 
 
 @pytest.fixture

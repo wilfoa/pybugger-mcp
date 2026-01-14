@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter
 
-from python_debugger_mcp.api.deps import SessionDep
-from python_debugger_mcp.models.requests import ContinueRequest, PauseRequest, StepRequest
-from python_debugger_mcp.models.responses import ExecutionResponse, LocationResponse
+from pybugger_mcp.api.deps import SessionDep
+from pybugger_mcp.models.requests import ContinueRequest, PauseRequest, StepRequest
+from pybugger_mcp.models.responses import ExecutionResponse, LocationResponse
 
 router = APIRouter(prefix="/sessions/{session_id}", tags=["Execution"])
 

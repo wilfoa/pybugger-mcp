@@ -2,19 +2,19 @@
 
 from fastapi import APIRouter, status
 
-from python_debugger_mcp.api.deps import SessionDep, SessionManagerDep
-from python_debugger_mcp.models.dap import AttachConfig, LaunchConfig
-from python_debugger_mcp.models.requests import (
+from pybugger_mcp.api.deps import SessionDep, SessionManagerDep
+from pybugger_mcp.models.dap import AttachConfig, LaunchConfig
+from pybugger_mcp.models.requests import (
     AttachRequest,
     CreateSessionRequest,
     LaunchRequest,
 )
-from python_debugger_mcp.models.responses import (
+from pybugger_mcp.models.responses import (
     ExecutionResponse,
     SessionListResponse,
     SessionResponse,
 )
-from python_debugger_mcp.models.session import SessionConfig
+from pybugger_mcp.models.session import SessionConfig
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 

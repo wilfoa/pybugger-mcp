@@ -2,10 +2,10 @@
 
 from fastapi import APIRouter, status
 
-from python_debugger_mcp.api.deps import SessionDep, SessionManagerDep
-from python_debugger_mcp.models.dap import SourceBreakpoint
-from python_debugger_mcp.models.requests import SetBreakpointsRequest
-from python_debugger_mcp.models.responses import (
+from pybugger_mcp.api.deps import SessionDep, SessionManagerDep
+from pybugger_mcp.models.dap import SourceBreakpoint
+from pybugger_mcp.models.requests import SetBreakpointsRequest
+from pybugger_mcp.models.responses import (
     BreakpointListResponse,
     BreakpointResponse,
     SetBreakpointsResponse,

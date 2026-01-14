@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter, Query
 
-from python_debugger_mcp.api.deps import SessionDep
-from python_debugger_mcp.models.responses import (
+from pybugger_mcp.api.deps import SessionDep
+from pybugger_mcp.models.responses import (
     EventResponse,
     EventsResponse,
     OutputLineResponse,

@@ -10,7 +10,7 @@ from typing import Any
 import aiofiles
 import aiofiles.os
 
-from python_debugger_mcp.core.exceptions import PersistenceError
+from pybugger_mcp.core.exceptions import PersistenceError
 
 
 def project_id_from_path(project_root: Path) -> str:

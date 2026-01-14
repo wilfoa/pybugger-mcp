@@ -2,13 +2,13 @@
 
 from fastapi import APIRouter
 
-from python_debugger_mcp.api.deps import SessionDep
-from python_debugger_mcp.models.requests import (
+from pybugger_mcp.api.deps import SessionDep
+from pybugger_mcp.models.requests import (
     AddWatchRequest,
     EvaluateWatchesRequest,
     RemoveWatchRequest,
 )
-from python_debugger_mcp.models.responses import (
+from pybugger_mcp.models.responses import (
     WatchListResponse,
     WatchResultResponse,
     WatchResultsResponse,

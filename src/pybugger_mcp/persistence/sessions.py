@@ -7,8 +7,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from python_debugger_mcp.config import settings
-from python_debugger_mcp.persistence.storage import (
+from pybugger_mcp.config import settings
+from pybugger_mcp.persistence.storage import (
     atomic_write,
     list_json_files,
     safe_delete,

@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from python_debugger_mcp.core.exceptions import (
+from pybugger_mcp.core.exceptions import (
     BreakpointNotFoundError,
     DAPConnectionError,
     DAPTimeoutError,

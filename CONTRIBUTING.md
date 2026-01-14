@@ -6,8 +6,8 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/wilfoa/python-debugger-mcp.git
-   cd python-debugger-mcp
+   git clone https://github.com/wilfoa/pybugger-mcp.git
+   cd pybugger-mcp
    ```
 
 2. **Create a virtual environment**

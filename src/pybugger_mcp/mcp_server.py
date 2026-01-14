@@ -6,7 +6,7 @@ tools to debug Python code interactively.
 
 Usage:
     # Run as stdio server (for AI host integration)
-    python -m python_debugger_mcp.mcp_server
+    python -m pybugger_mcp.mcp_server
 
     # Or via entry point
     python-debugger-mcp-server
@@ -18,14 +18,14 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from python_debugger_mcp.core.exceptions import (
+from pybugger_mcp.core.exceptions import (
     InvalidSessionStateError,
     SessionLimitError,
     SessionNotFoundError,
 )
-from python_debugger_mcp.core.session import SessionManager
-from python_debugger_mcp.models.dap import LaunchConfig, SourceBreakpoint
-from python_debugger_mcp.models.session import SessionConfig
+from pybugger_mcp.core.session import SessionManager
+from pybugger_mcp.models.dap import LaunchConfig, SourceBreakpoint
+from pybugger_mcp.models.session import SessionConfig
 
 logger = logging.getLogger(__name__)
 

@@ -9,15 +9,15 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from python_debugger_mcp.adapters.debugpy_adapter import DebugpyAdapter
-from python_debugger_mcp.config import settings
-from python_debugger_mcp.core.events import EventQueue
-from python_debugger_mcp.core.exceptions import (
+from pybugger_mcp.adapters.debugpy_adapter import DebugpyAdapter
+from pybugger_mcp.config import settings
+from pybugger_mcp.core.events import EventQueue
+from pybugger_mcp.core.exceptions import (
     InvalidSessionStateError,
     SessionLimitError,
     SessionNotFoundError,
 )
-from python_debugger_mcp.models.dap import (
+from pybugger_mcp.models.dap import (
     AttachConfig,
     Breakpoint,
     LaunchConfig,
@@ -27,11 +27,11 @@ from python_debugger_mcp.models.dap import (
     Thread,
     Variable,
 )
-from python_debugger_mcp.models.events import EventType
-from python_debugger_mcp.models.session import SessionConfig, SessionInfo
-from python_debugger_mcp.persistence.breakpoints import BreakpointStore
-from python_debugger_mcp.persistence.sessions import PersistedSession, SessionStore
-from python_debugger_mcp.utils.output_buffer import OutputBuffer
+from pybugger_mcp.models.events import EventType
+from pybugger_mcp.models.session import SessionConfig, SessionInfo
+from pybugger_mcp.persistence.breakpoints import BreakpointStore
+from pybugger_mcp.persistence.sessions import PersistedSession, SessionStore
+from pybugger_mcp.utils.output_buffer import OutputBuffer
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from python_debugger_mcp.core.session import SessionManager
-from python_debugger_mcp.main import create_app
+from pybugger_mcp.core.session import SessionManager
+from pybugger_mcp.main import create_app
 
 
 @pytest_asyncio.fixture
@@ -14,7 +14,7 @@ async def test_client(tmp_path):
     app = create_app()
 
     # Initialize session manager manually for testing
-    from python_debugger_mcp.persistence.breakpoints import BreakpointStore
+    from pybugger_mcp.persistence.breakpoints import BreakpointStore
 
     breakpoint_store = BreakpointStore(base_dir=tmp_path / "breakpoints")
     session_manager = SessionManager(breakpoint_store=breakpoint_store)

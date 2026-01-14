@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from python_debugger_mcp.models.dap import SourceBreakpoint
-from python_debugger_mcp.persistence.breakpoints import BreakpointStore
-from python_debugger_mcp.persistence.storage import (
+from pybugger_mcp.models.dap import SourceBreakpoint
+from pybugger_mcp.persistence.breakpoints import BreakpointStore
+from pybugger_mcp.persistence.storage import (
     atomic_write,
     project_id_from_path,
     safe_delete,

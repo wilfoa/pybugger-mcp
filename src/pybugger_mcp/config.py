@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_prefix="PYTHON_DEBUGGER_MCP_",
+        env_prefix="PYBUGGER_MCP_",
         env_file=".env",
         env_file_encoding="utf-8",
     )
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     )
 
     # Persistence
-    data_dir: Path = Field(default_factory=lambda: Path.home() / ".python-debugger-mcp")
+    data_dir: Path = Field(default_factory=lambda: Path.home() / ".pybugger-mcp")
 
     # DAP settings
     dap_timeout_seconds: float = Field(default=30.0, ge=1.0, le=300.0)

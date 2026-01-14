@@ -7,7 +7,7 @@ import logging
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-from python_debugger_mcp.core.exceptions import DAPError, DAPTimeoutError
+from pybugger_mcp.core.exceptions import DAPError, DAPTimeoutError
 
 logger = logging.getLogger(__name__)
 

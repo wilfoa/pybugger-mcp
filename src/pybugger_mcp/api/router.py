@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from python_debugger_mcp.api import (
+from pybugger_mcp.api import (
     breakpoints,
     execution,
     inspection,

@@ -7,10 +7,10 @@ import sys
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-from python_debugger_mcp.adapters.dap_client import DAPClient
-from python_debugger_mcp.config import settings
-from python_debugger_mcp.core.exceptions import DAPConnectionError, LaunchError
-from python_debugger_mcp.models.dap import (
+from pybugger_mcp.adapters.dap_client import DAPClient
+from pybugger_mcp.config import settings
+from pybugger_mcp.core.exceptions import DAPConnectionError, LaunchError
+from pybugger_mcp.models.dap import (
     AttachConfig,
     Breakpoint,
     LaunchConfig,
@@ -20,7 +20,7 @@ from python_debugger_mcp.models.dap import (
     Thread,
     Variable,
 )
-from python_debugger_mcp.models.events import EventType
+from pybugger_mcp.models.events import EventType
 
 logger = logging.getLogger(__name__)
 

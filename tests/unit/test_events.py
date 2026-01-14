@@ -4,8 +4,8 @@ import asyncio
 
 import pytest
 
-from python_debugger_mcp.core.events import EventQueue
-from python_debugger_mcp.models.events import DebugEvent, EventType
+from pybugger_mcp.core.events import EventQueue
+from pybugger_mcp.models.events import DebugEvent, EventType
 
 
 class TestEventQueue:

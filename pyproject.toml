@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "python-debugger-mcp"
+name = "pybugger-mcp"
 version = "1.0.0"
 description = "MCP server for interactive Python debugging with AI agents via debugpy/DAP"
 readme = "README.md"
@@ -53,18 +53,18 @@ dev = [
 ]
 
 [project.scripts]
-python-debugger-mcp = "python_debugger_mcp.main:main"
-python-debugger-mcp-server = "python_debugger_mcp.mcp_server:main"
+pybugger-mcp = "pybugger_mcp.main:main"
+pybugger-mcp-server = "pybugger_mcp.mcp_server:main"
 
 [project.urls]
-Homepage = "https://github.com/wilfoa/python-debugger-mcp"
-Documentation = "https://github.com/wilfoa/python-debugger-mcp#readme"
-Repository = "https://github.com/wilfoa/python-debugger-mcp"
-Issues = "https://github.com/wilfoa/python-debugger-mcp/issues"
-Changelog = "https://github.com/wilfoa/python-debugger-mcp/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/wilfoa/pybugger-mcp"
+Documentation = "https://github.com/wilfoa/pybugger-mcp#readme"
+Repository = "https://github.com/wilfoa/pybugger-mcp"
+Issues = "https://github.com/wilfoa/pybugger-mcp/issues"
+Changelog = "https://github.com/wilfoa/pybugger-mcp/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/python_debugger_mcp"]
+packages = ["src/pybugger_mcp"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -98,7 +98,7 @@ filterwarnings = [
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["src/python_debugger_mcp"]
+source = ["src/pybugger_mcp"]
 branch = true
 omit = [
     "*/tests/*",
@@ -144,13 +144,13 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["python_debugger_mcp"]
+known-first-party = ["pybugger_mcp"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["ARG001", "ARG002"]  # Unused function arguments (fixtures)
-"src/python_debugger_mcp/api/errors.py" = ["ARG001"]  # FastAPI error handlers require request arg
-"src/python_debugger_mcp/mcp_server.py" = ["ARG001"]  # FastMCP lifespan requires app arg
-"src/python_debugger_mcp/models/requests.py" = ["ARG003"]  # Pydantic validator signature
+"src/pybugger_mcp/api/errors.py" = ["ARG001"]  # FastAPI error handlers require request arg
+"src/pybugger_mcp/mcp_server.py" = ["ARG001"]  # FastMCP lifespan requires app arg
+"src/pybugger_mcp/models/requests.py" = ["ARG003"]  # Pydantic validator signature
 
 # MyPy configuration
 [tool.mypy]
@@ -175,7 +175,7 @@ disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
 [[tool.mypy.overrides]]
-module = "python_debugger_mcp.mcp_server"
+module = "pybugger_mcp.mcp_server"
 disallow_untyped_decorators = false
 disallow_untyped_defs = false
 disallow_untyped_calls = false
@@ -184,7 +184,7 @@ warn_return_any = false
 # Semantic Release configuration
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-version_variables = ["src/python_debugger_mcp/__init__.py:__version__"]
+version_variables = ["src/pybugger_mcp/__init__.py:__version__"]
 branch = "main"
 build_command = "pip install build && python -m build"
 commit_message = "chore(release): {version} [skip ci]"

@@ -4,10 +4,10 @@ import sys
 
 from fastapi import APIRouter
 
-from python_debugger_mcp import __version__
-from python_debugger_mcp.api.deps import SessionManagerDep
-from python_debugger_mcp.config import settings
-from python_debugger_mcp.models.responses import HealthResponse, InfoResponse
+from pybugger_mcp import __version__
+from pybugger_mcp.api.deps import SessionManagerDep
+from pybugger_mcp.config import settings
+from pybugger_mcp.models.responses import HealthResponse, InfoResponse
 
 router = APIRouter(tags=["Server"])
 

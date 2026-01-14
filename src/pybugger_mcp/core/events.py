@@ -5,7 +5,7 @@ import contextlib
 from datetime import datetime, timezone
 from typing import Any
 
-from python_debugger_mcp.models.events import DebugEvent, EventType
+from pybugger_mcp.models.events import DebugEvent, EventType
 
 
 class EventQueue:

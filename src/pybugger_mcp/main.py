@@ -7,11 +7,11 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from python_debugger_mcp import __version__
-from python_debugger_mcp.api.errors import register_error_handlers
-from python_debugger_mcp.api.router import api_router
-from python_debugger_mcp.config import settings
-from python_debugger_mcp.core.session import SessionManager
+from pybugger_mcp import __version__
+from pybugger_mcp.api.errors import register_error_handlers
+from pybugger_mcp.api.router import api_router
+from pybugger_mcp.config import settings
+from pybugger_mcp.core.session import SessionManager
 
 # Configure logging
 logging.basicConfig(
@@ -69,7 +69,7 @@ app = create_app()
 def main() -> None:
     """Run the server."""
     uvicorn.run(
-        "python_debugger_mcp.main:app",
+        "pybugger_mcp.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,

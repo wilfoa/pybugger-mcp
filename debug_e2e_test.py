@@ -6,9 +6,9 @@ from pathlib import Path
 
 from httpx import ASGITransport, AsyncClient
 
-from python_debugger_mcp.core.session import SessionManager
-from python_debugger_mcp.main import create_app
-from python_debugger_mcp.persistence.breakpoints import BreakpointStore
+from pybugger_mcp.core.session import SessionManager
+from pybugger_mcp.main import create_app
+from pybugger_mcp.persistence.breakpoints import BreakpointStore
 
 
 async def wait_for_state(

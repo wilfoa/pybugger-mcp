@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from python_debugger_mcp.config import settings
-from python_debugger_mcp.models.dap import SourceBreakpoint
-from python_debugger_mcp.persistence.storage import (
+from pybugger_mcp.config import settings
+from pybugger_mcp.models.dap import SourceBreakpoint
+from pybugger_mcp.persistence.storage import (
     atomic_write,
     project_id_from_path,
     safe_delete,
