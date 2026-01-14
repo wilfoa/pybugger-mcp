@@ -7,8 +7,8 @@
 
 A Model Context Protocol (MCP) server that enables AI agents to debug Python code interactively. Set breakpoints, step through code, inspect variables, and evaluate expressions - all through natural conversation with your AI assistant.
 
-[![Install in Cursor](https://img.shields.io/badge/Cursor-Install%20MCP-blue?style=for-the-badge&logo=cursor)](https://cursor.com/install-mcp?name=python-debugger&config=eyJjb21tYW5kIjoicHl0aG9uIiwiYXJncyI6WyItbSIsInB5dGhvbl9kZWJ1Z2dlcl9tY3AubWNwX3NlcnZlciJdfQ==)
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install%20Server-0098FF?style=for-the-badge&logo=visualstudiocode)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522python-debugger%2522%252C%2522command%2522%253A%2522python%2522%252C%2522args%2522%253A%255B%2522-m%2522%252C%2522python_debugger_mcp.mcp_server%2522%255D%257D)
+[![Install in Cursor](https://img.shields.io/badge/Cursor-Install%20MCP-blue?style=for-the-badge&logo=cursor)](https://cursor.com/install-mcp?name=python-debugger&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJweXRob24tZGVidWdnZXItbWNwIl19)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install%20Server-0098FF?style=for-the-badge&logo=visualstudiocode)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%20%22python-debugger%22%2C%20%22command%22%3A%20%22uvx%22%2C%20%22args%22%3A%20%5B%22python-debugger-mcp%22%5D%7D)
 
 ## Demo
 
@@ -24,18 +24,46 @@ https://github.com/wilfoa/python-debugger-mcp/raw/main/docs/demo.mov
 
 ## Installation
 
-First, install the package:
+### Quick Install (no clone required)
 
+**Using uvx (recommended):**
 ```bash
-pip install python-debugger-mcp
+uvx python-debugger-mcp
 ```
 
-Then configure your MCP client:
+**Using pipx:**
+```bash
+pipx run python-debugger-mcp
+```
+
+**Using pip:**
+```bash
+pip install python-debugger-mcp
+python-debugger-mcp
+```
+
+### MCP Client Configuration
+
+Configure your MCP client to use one of these commands:
 
 <details>
 <summary><b>Cursor</b></summary>
 
 Add to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "python-debugger": {
+      "command": "uvx",
+      "args": ["python-debugger-mcp"]
+    }
+  }
+}
+```
+
+<details>
+<summary>Alternative: using pip install</summary>
 
 ```json
 {
@@ -48,6 +76,7 @@ Add to `~/.cursor/mcp.json`:
 }
 ```
 </details>
+</details>
 
 <details>
 <summary><b>VS Code</b></summary>
@@ -55,7 +84,7 @@ Add to `~/.cursor/mcp.json`:
 Use the VS Code CLI:
 
 ```bash
-code --add-mcp '{"name":"python-debugger","command":"python","args":["-m","python_debugger_mcp.mcp_server"]}'
+code --add-mcp '{"name":"python-debugger","command":"uvx","args":["python-debugger-mcp"]}'
 ```
 
 Or add to your MCP settings manually.
@@ -65,7 +94,7 @@ Or add to your MCP settings manually.
 <summary><b>Claude Code</b></summary>
 
 ```bash
-claude mcp add python-debugger -- python -m python_debugger_mcp.mcp_server
+claude mcp add python-debugger -- uvx python-debugger-mcp
 ```
 </details>
 
@@ -78,8 +107,8 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 {
   "mcpServers": {
     "python-debugger": {
-      "command": "python",
-      "args": ["-m", "python_debugger_mcp.mcp_server"]
+      "command": "uvx",
+      "args": ["python-debugger-mcp"]
     }
   }
 }
@@ -96,7 +125,7 @@ Add to `~/.config/opencode/opencode.json`:
   "mcp": {
     "python-debugger": {
       "type": "local",
-      "command": ["python", "-m", "python_debugger_mcp.mcp_server"],
+      "command": ["uvx", "python-debugger-mcp"],
       "enabled": true
     }
   }
@@ -113,8 +142,8 @@ Add to your Windsurf MCP config:
 {
   "mcpServers": {
     "python-debugger": {
-      "command": "python",
-      "args": ["-m", "python_debugger_mcp.mcp_server"]
+      "command": "uvx",
+      "args": ["python-debugger-mcp"]
     }
   }
 }
@@ -130,8 +159,8 @@ Add to your `cline_mcp_settings.json`:
 {
   "mcpServers": {
     "python-debugger": {
-      "command": "python",
-      "args": ["-m", "python_debugger_mcp.mcp_server"],
+      "command": "uvx",
+      "args": ["python-debugger-mcp"],
       "disabled": false
     }
   }
@@ -144,7 +173,7 @@ Add to your `cline_mcp_settings.json`:
 
 Go to Settings > Extensions > Add custom extension:
 - Type: STDIO
-- Command: `python -m python_debugger_mcp.mcp_server`
+- Command: `uvx python-debugger-mcp`
 </details>
 
 <details>
