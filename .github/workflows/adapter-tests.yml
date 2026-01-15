@@ -1,0 +1,149 @@
+name: Adapter Tests
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # Python adapter tests (always run - core functionality)
+  python-adapter:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction
+
+      - name: Run Python adapter tests
+        run: |
+          poetry run pytest tests/e2e/test_adapter_python.py -v --tb=short
+
+  # JavaScript/Node.js adapter tests (when implemented)
+  # Uncomment when NodeAdapter is ready
+  # javascript-adapter:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: ["18", "20", "22"]
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+  #
+  #     - name: Install js-debug adapter
+  #       run: npm install -g @vscode/js-debug-cli
+  #
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #
+  #     - name: Install Poetry
+  #       uses: snok/install-poetry@v1
+  #
+  #     - name: Install dependencies
+  #       run: poetry install --no-interaction
+  #
+  #     - name: Run JavaScript adapter tests
+  #       run: |
+  #         poetry run pytest tests/e2e/test_adapter_javascript.py -v --tb=short
+
+  # Go adapter tests (when implemented)
+  # Uncomment when DelveAdapter is ready
+  # go-adapter:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       go-version: ["1.21", "1.22"]
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up Go ${{ matrix.go-version }}
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ matrix.go-version }}
+  #
+  #     - name: Install delve
+  #       run: go install github.com/go-delve/delve/cmd/dlv@latest
+  #
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #
+  #     - name: Install Poetry
+  #       uses: snok/install-poetry@v1
+  #
+  #     - name: Install dependencies
+  #       run: poetry install --no-interaction
+  #
+  #     - name: Run Go adapter tests
+  #       run: |
+  #         poetry run pytest tests/e2e/test_adapter_go.py -v --tb=short
+
+  # Rust adapter tests (when implemented)
+  # Uncomment when LLDBAdapter is ready
+  # rust-adapter:
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up Rust
+  #       uses: dtolnay/rust-toolchain@stable
+  #
+  #     - name: Install CodeLLDB
+  #       run: |
+  #         # Install LLDB
+  #         sudo apt-get update
+  #         sudo apt-get install -y lldb
+  #
+  #     - name: Compile test fixture
+  #       run: |
+  #         rustc -g tests/e2e/fixtures/rust/simple.rs -o /tmp/rust_simple
+  #
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #
+  #     - name: Install Poetry
+  #       uses: snok/install-poetry@v1
+  #
+  #     - name: Install dependencies
+  #       run: poetry install --no-interaction
+  #
+  #     - name: Run Rust adapter tests
+  #       run: |
+  #         poetry run pytest tests/e2e/test_adapter_rust.py -v --tb=short
