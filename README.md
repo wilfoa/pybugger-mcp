@@ -28,8 +28,11 @@ A lightweight, pure-Python MCP server for interactive debugging. Uses debugpy (V
 
 - **Session Recovery** - Persist debug state and resume after server restart
 - **Watch Expressions** - Define expressions to track across every debug step
+- **Smart Data Inspection** - Intelligent preview of DataFrames, NumPy arrays, dicts, and lists
+- **Call Hierarchy** - Visualize the complete call chain with source context
 - **Full Interactive Debugging** - Breakpoints, stepping, pause/continue
 - **Variable Inspection** - View locals, globals, evaluate arbitrary expressions
+- **Rich TUI Output** - ASCII box-drawn tables and diagrams for better visualization
 - **Pure Python** - No Node.js required, just `pip install`
 - **Dual Interface** - Use via MCP or standalone HTTP API
 - **Multi-Client Support** - Cursor, VS Code, Claude Desktop, and more
@@ -209,32 +212,60 @@ Or in your MCP config:
 ```
 </details>
 
-## Available Tools
+## Available Tools (27 tools)
 
+### Session Management
 | Tool | Description |
 |------|-------------|
 | `debug_create_session` | Create a new debug session for a project |
 | `debug_list_sessions` | List all active debug sessions |
 | `debug_get_session` | Get detailed session information |
 | `debug_terminate_session` | End a debug session and clean up |
+
+### Breakpoints
+| Tool | Description |
+|------|-------------|
 | `debug_set_breakpoints` | Set breakpoints in source files (with optional conditions) |
 | `debug_get_breakpoints` | List all breakpoints for a session |
 | `debug_clear_breakpoints` | Remove breakpoints from files |
+
+### Execution Control
+| Tool | Description |
+|------|-------------|
 | `debug_launch` | Launch a Python program for debugging |
 | `debug_continue` | Continue execution until next breakpoint |
 | `debug_step_over` | Step to the next line (skip function calls) |
 | `debug_step_into` | Step into a function call |
 | `debug_step_out` | Step out of the current function |
 | `debug_pause` | Pause a running program |
-| `debug_get_stacktrace` | Get the current call stack |
+
+### Inspection
+| Tool | Description |
+|------|-------------|
+| `debug_get_stacktrace` | Get the current call stack (supports TUI format) |
 | `debug_get_scopes` | Get variable scopes (locals, globals) |
-| `debug_get_variables` | Get variables in a scope |
+| `debug_get_variables` | Get variables in a scope (supports TUI format) |
 | `debug_evaluate` | Evaluate a Python expression |
+| `debug_inspect_variable` | **Smart inspection** of DataFrames, arrays, dicts with metadata |
+| `debug_get_call_chain` | **Call hierarchy** with source context for each frame |
+
+### Watch Expressions
+| Tool | Description |
+|------|-------------|
 | `debug_add_watch` | Add a watch expression |
 | `debug_remove_watch` | Remove a watch expression |
+| `debug_list_watches` | List all watch expressions |
 | `debug_evaluate_watches` | Evaluate all watch expressions |
+
+### Events & Output
+| Tool | Description |
+|------|-------------|
 | `debug_poll_events` | Poll for debug events (stopped, terminated, etc.) |
 | `debug_get_output` | Get program stdout/stderr |
+
+### Recovery
+| Tool | Description |
+|------|-------------|
 | `debug_list_recoverable` | List sessions that can be recovered |
 | `debug_recover_session` | Recover a session from previous server run |
 
@@ -250,8 +281,9 @@ Or in your MCP config:
 3. **Start debugging:** Ask your AI assistant:
    > "Debug my script.py - set a breakpoint on line 15 and show me the variables when it stops"
 
-## Example Workflow
+## Example Workflows
 
+### Basic Debugging
 ```
 You: Debug tests/test_example.py - I want to see why the calculate function returns wrong results
 
@@ -264,6 +296,47 @@ AI: I'll create a debug session and set breakpoints in the calculate function.
     - result = 50  # This should be 15!
 
     I see the issue - you're using multiplication instead of addition on line 24.
+```
+
+### Data Science Debugging
+```
+You: Debug my data pipeline and inspect the DataFrame at line 45
+
+AI: [Sets breakpoint, launches program]
+
+    The DataFrame `df` has 1000 rows x 5 columns (78.1 KB):
+
+    ┌────────────┬────────────────┬────────┐
+    │ Name       │ Type           │ Nulls  │
+    ├────────────┼────────────────┼────────┤
+    │ id         │ int64          │ -      │
+    │ name       │ object         │ 5      │
+    │ value      │ float64        │ 12     │
+    └────────────┴────────────────┴────────┘
+
+    I found 17 null values. The `value` column has NaN entries that may cause issues.
+```
+
+### Call Hierarchy Visualization
+```
+You: Show me how we got to this breakpoint
+
+AI: [Uses debug_get_call_chain with format="tui"]
+
+    CALL CHAIN (4 frames)
+    ════════════════════════════════════════════════════════════
+
+    main (app.py:50)
+    │ >> 50 │     result = process_order(order)
+    │
+    └─▶ process_order (orders.py:76)
+        │ >> 76 │     pricing = apply_pricing(items, tier)
+        │
+        └─▶ apply_pricing (pricing.py:58)
+            │ >> 58 │     discount = calculate_discount(subtotal)
+            │
+            └─▶ calculate_discount (pricing.py:23)  ◀── YOU ARE HERE
+                │ >> 23 │     return base * rate
 ```
 
 ## Configuration
