@@ -91,7 +91,7 @@ class NodeAdapter(DebugAdapter):
             "4. Store capabilities"
         )
 
-    async def launch(self, config: LaunchConfig) -> None:
+    async def launch(self, config: LaunchConfig | Any, **kwargs: Any) -> None:
         """Launch a Node.js program for debugging.
 
         Node-specific launch options (in config.extra):
@@ -103,7 +103,7 @@ class NodeAdapter(DebugAdapter):
         """
         raise NotImplementedError("Node.js adapter is a stub")
 
-    async def attach(self, config: AttachConfig) -> None:
+    async def attach(self, config: AttachConfig | Any, **kwargs: Any) -> None:
         """Attach to a running Node.js process.
 
         Node supports attaching via:

@@ -201,8 +201,9 @@ class DebugpyAdapter(DebugAdapter):
 
     async def launch(
         self,
-        config: LaunchConfig,
+        config: LaunchConfig | BaseLaunchConfig | Any,
         configure_callback: Callable[[], Coroutine[Any, Any, None]] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Launch the debug target.
 
@@ -214,11 +215,26 @@ class DebugpyAdapter(DebugAdapter):
         5. Receive 'launch' response
 
         Args:
-            config: Launch configuration
+            config: Launch configuration (LaunchConfig or base LaunchConfig)
             configure_callback: Optional async callback to set breakpoints during
                                configuration phase (after 'initialized' event)
+            **kwargs: Additional options (unused, for ABC compatibility)
         """
-        self._require_initialized()
+        client = self._require_initialized()
+
+        # Handle base LaunchConfig by converting to DAP LaunchConfig
+        if isinstance(config, BaseLaunchConfig):
+            dap_config = LaunchConfig(
+                program=config.program,
+                stop_on_entry=config.stop_on_entry,
+            )
+            if config.args:
+                dap_config.args = config.args
+            if config.cwd:
+                dap_config.cwd = config.cwd
+            if config.env:
+                dap_config.env = config.env
+            config = dap_config
 
         # Merge user env with vars that prevent TTY access in subprocess
         env = {
@@ -256,6 +272,7 @@ class DebugpyAdapter(DebugAdapter):
         try:
             # Set up event to wait for 'initialized' event
             self._initialized_event = asyncio.Event()
+            initialized_event = self._initialized_event
 
             # Launch request and configurationDone must be coordinated:
             # - launch request triggers debugpy to send 'initialized' event
@@ -265,7 +282,7 @@ class DebugpyAdapter(DebugAdapter):
 
             async def send_launch() -> None:
                 """Send launch and wait for response."""
-                await self._client.send_request(  # type: ignore
+                await client.send_request(
                     "launch",
                     args,
                     timeout=settings.dap_launch_timeout_seconds,
@@ -275,13 +292,13 @@ class DebugpyAdapter(DebugAdapter):
                 """Wait for initialized event, configure, and send configurationDone."""
                 try:
                     await asyncio.wait_for(
-                        self._initialized_event.wait(),  # type: ignore
+                        initialized_event.wait(),
                         timeout=settings.dap_launch_timeout_seconds,
                     )
                     # Run configuration callback (set breakpoints, etc.)
                     if configure_callback:
                         await configure_callback()
-                    await self._client.send_request("configurationDone", {})  # type: ignore
+                    await client.send_request("configurationDone", {})
                 except asyncio.TimeoutError:
                     raise LaunchError("Timeout waiting for initialized event")
 
@@ -297,8 +314,9 @@ class DebugpyAdapter(DebugAdapter):
 
     async def attach(
         self,
-        config: AttachConfig,
+        config: AttachConfig | BaseAttachConfig | Any,
         configure_callback: Callable[[], Coroutine[Any, Any, None]] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Attach to a running process.
 
@@ -310,11 +328,22 @@ class DebugpyAdapter(DebugAdapter):
         5. Receive 'attach' response
 
         Args:
-            config: Attach configuration
+            config: Attach configuration (AttachConfig or base AttachConfig)
             configure_callback: Optional async callback to set breakpoints during
                                configuration phase (after 'initialized' event)
+            **kwargs: Additional options (unused, for ABC compatibility)
         """
-        self._require_initialized()
+        client = self._require_initialized()
+
+        # Handle base AttachConfig by converting to DAP AttachConfig
+        if isinstance(config, BaseAttachConfig):
+            dap_config = AttachConfig(
+                host=config.host,
+                process_id=config.process_id,
+            )
+            if config.port is not None:
+                dap_config.port = config.port
+            config = dap_config
 
         args: dict[str, Any] = {
             "justMyCode": False,
@@ -331,19 +360,20 @@ class DebugpyAdapter(DebugAdapter):
 
         try:
             self._initialized_event = asyncio.Event()
+            initialized_event = self._initialized_event
 
             async def send_attach() -> None:
-                await self._client.send_request("attach", args)  # type: ignore
+                await client.send_request("attach", args)
 
             async def wait_configure_done() -> None:
                 try:
                     await asyncio.wait_for(
-                        self._initialized_event.wait(),  # type: ignore
+                        initialized_event.wait(),
                         timeout=settings.dap_launch_timeout_seconds,
                     )
                     if configure_callback:
                         await configure_callback()
-                    await self._client.send_request("configurationDone", {})  # type: ignore
+                    await client.send_request("configurationDone", {})
                 except asyncio.TimeoutError:
                     raise LaunchError("Timeout waiting for initialized event during attach")
 
@@ -416,7 +446,7 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             List of verified breakpoints
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
         # Filter only enabled breakpoints
         enabled_breakpoints = [bp for bp in breakpoints if bp.enabled]
@@ -434,7 +464,7 @@ class DebugpyAdapter(DebugAdapter):
                 bp_arg["logMessage"] = bp.log_message
             bp_args.append(bp_arg)
 
-        response = await self._client.send_request(  # type: ignore
+        response = await client.send_request(
             "setBreakpoints",
             {
                 "source": {"path": source_path},
@@ -450,9 +480,9 @@ class DebugpyAdapter(DebugAdapter):
         Args:
             filters: List of exception filters ("raised", "uncaught", etc.)
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
-        await self._client.send_request(  # type: ignore
+        await client.send_request(
             "setExceptionBreakpoints",
             {"filters": filters},
         )
@@ -466,10 +496,10 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             List of actual breakpoints
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
         breakpoints = [{"name": name} for name in names]
-        response = await self._client.send_request(  # type: ignore
+        response = await client.send_request(
             "setFunctionBreakpoints",
             {"breakpoints": breakpoints},
         )
@@ -482,10 +512,10 @@ class DebugpyAdapter(DebugAdapter):
         Args:
             thread_id: Thread to continue (required for debugpy)
         """
-        self._require_initialized()
+        client = self._require_initialized()
         if thread_id is None:
             raise ValueError("thread_id is required for debugpy")
-        await self._client.send_request("continue", {"threadId": thread_id})  # type: ignore
+        await client.send_request("continue", {"threadId": thread_id})
 
     # Alias for backward compatibility
     async def continue_(self, thread_id: int) -> None:
@@ -498,10 +528,10 @@ class DebugpyAdapter(DebugAdapter):
         Args:
             thread_id: Thread to pause (required for debugpy)
         """
-        self._require_initialized()
+        client = self._require_initialized()
         if thread_id is None:
             raise ValueError("thread_id is required for debugpy")
-        await self._client.send_request("pause", {"threadId": thread_id})  # type: ignore
+        await client.send_request("pause", {"threadId": thread_id})
 
     async def step_over(self, thread_id: int | None = None) -> None:
         """Step over (next line).
@@ -509,10 +539,10 @@ class DebugpyAdapter(DebugAdapter):
         Args:
             thread_id: Thread to step (required for debugpy)
         """
-        self._require_initialized()
+        client = self._require_initialized()
         if thread_id is None:
             raise ValueError("thread_id is required for debugpy")
-        await self._client.send_request("next", {"threadId": thread_id})  # type: ignore
+        await client.send_request("next", {"threadId": thread_id})
 
     async def step_into(self, thread_id: int | None = None) -> None:
         """Step into function.
@@ -520,10 +550,10 @@ class DebugpyAdapter(DebugAdapter):
         Args:
             thread_id: Thread to step (required for debugpy)
         """
-        self._require_initialized()
+        client = self._require_initialized()
         if thread_id is None:
             raise ValueError("thread_id is required for debugpy")
-        await self._client.send_request("stepIn", {"threadId": thread_id})  # type: ignore
+        await client.send_request("stepIn", {"threadId": thread_id})
 
     async def step_out(self, thread_id: int | None = None) -> None:
         """Step out of function.
@@ -531,10 +561,10 @@ class DebugpyAdapter(DebugAdapter):
         Args:
             thread_id: Thread to step (required for debugpy)
         """
-        self._require_initialized()
+        client = self._require_initialized()
         if thread_id is None:
             raise ValueError("thread_id is required for debugpy")
-        await self._client.send_request("stepOut", {"threadId": thread_id})  # type: ignore
+        await client.send_request("stepOut", {"threadId": thread_id})
 
     async def get_threads(self) -> list[Thread]:
         """Get all threads.
@@ -542,8 +572,8 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             List of threads
         """
-        self._require_initialized()
-        response = await self._client.send_request("threads")  # type: ignore
+        client = self._require_initialized()
+        response = await client.send_request("threads")
         return [Thread(**t) for t in response.get("threads", [])]
 
     # Alias for backward compatibility
@@ -567,9 +597,9 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             List of stack frames
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
-        response = await self._client.send_request(  # type: ignore
+        response = await client.send_request(
             "stackTrace",
             {
                 "threadId": thread_id,
@@ -599,9 +629,9 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             List of scopes
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
-        response = await self._client.send_request(  # type: ignore
+        response = await client.send_request(
             "scopes",
             {"frameId": frame_id},
         )
@@ -629,9 +659,9 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             List of variables
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
-        response = await self._client.send_request(  # type: ignore
+        response = await client.send_request(
             "variables",
             {
                 "variablesReference": variables_reference,
@@ -668,7 +698,7 @@ class DebugpyAdapter(DebugAdapter):
         Returns:
             Evaluation result with "result" and "type" keys
         """
-        self._require_initialized()
+        client = self._require_initialized()
 
         args: dict[str, Any] = {
             "expression": expression,
@@ -677,7 +707,7 @@ class DebugpyAdapter(DebugAdapter):
         if frame_id is not None:
             args["frameId"] = frame_id
 
-        return await self._client.send_request("evaluate", args)  # type: ignore
+        return await client.send_request("evaluate", args)
 
     async def _handle_event(self, event_type: str, body: dict[str, Any]) -> None:
         """Handle DAP events from debugpy."""
@@ -708,10 +738,18 @@ class DebugpyAdapter(DebugAdapter):
         if self._event_callback and event_type in event_mapping:
             await self._event_callback(event_mapping[event_type], body)
 
-    def _require_initialized(self) -> None:
-        """Raise if not initialized."""
-        if not self._initialized:
+    def _require_initialized(self) -> DAPClient:
+        """Raise if not initialized, otherwise return the client.
+
+        Returns:
+            The DAP client (guaranteed non-None after initialization)
+
+        Raises:
+            DAPConnectionError: If adapter is not initialized
+        """
+        if not self._initialized or self._client is None:
             raise DAPConnectionError("Adapter not initialized")
+        return self._client
 
     @property
     def is_initialized(self) -> bool:
