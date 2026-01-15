@@ -399,7 +399,7 @@ async def debug_get_stacktrace(
     session_id: str,
     thread_id: int | None = None,
     max_frames: int = 20,
-    format: str = "json",
+    format: str = "tui",
 ) -> dict[str, Any]:
     """Get call stack frames.
 
@@ -444,7 +444,7 @@ async def debug_get_stacktrace(
 async def debug_get_scopes(
     session_id: str,
     frame_id: int,
-    format: str = "json",
+    format: str = "tui",
 ) -> dict[str, Any]:
     """Get scopes (locals, globals) for a frame.
 
@@ -485,7 +485,7 @@ async def debug_get_variables(
     session_id: str,
     variables_reference: int,
     max_count: int = 100,
-    format: str = "json",
+    format: str = "tui",
 ) -> dict[str, Any]:
     """Get variables from a scope or compound variable.
 
@@ -560,7 +560,7 @@ async def debug_inspect_variable(
     frame_id: int | None = None,
     max_preview_rows: int = 5,
     include_statistics: bool = True,
-    format: str = "json",
+    format: str = "tui",
 ) -> dict[str, Any]:
     """Smart inspect DataFrames, arrays, dicts, lists with type-aware metadata.
 
@@ -634,7 +634,7 @@ async def debug_get_call_chain(
     thread_id: int | None = None,
     include_source_context: bool = True,
     context_lines: int = 2,
-    format: str = "json",
+    format: str = "tui",
 ) -> dict[str, Any]:
     """Get call stack with source context showing path to current location.
 
