@@ -53,19 +53,27 @@ def _get_free_port() -> int:
         return port
 
 
-def _find_codelldb() -> str | None:
-    """Find the CodeLLDB adapter executable.
+def _find_codelldb() -> tuple[str | None, str]:
+    """Find the CodeLLDB or lldb-dap adapter executable.
+
+    Returns:
+        Tuple of (path, adapter_type) where adapter_type is 'codelldb' or 'lldb-dap'.
+        lldb-dap uses stdin/stdout, while codelldb uses TCP port.
 
     Searches in common locations:
     - PATH (codelldb, lldb-dap)
     - VS Code extensions directory
     - Common installation paths
     """
-    # Check PATH first
-    for cmd in ["codelldb", "lldb-dap", "lldb-vscode"]:
+    # Check PATH first - prefer lldb-dap over codelldb (lldb-dap is more reliable)
+    for cmd, adapter_type in [
+        ("lldb-dap", "lldb-dap"),
+        ("lldb-vscode", "lldb-dap"),
+        ("codelldb", "codelldb"),
+    ]:
         path = shutil.which(cmd)
         if path:
-            return path
+            return path, adapter_type
 
     # Check VS Code extensions directory
     home = Path.home()
@@ -89,21 +97,21 @@ def _find_codelldb() -> str | None:
                 adapter = ext / "adapter" / "codelldb.exe"
 
             if adapter.exists():
-                return str(adapter)
+                return str(adapter), "codelldb"
 
-    # Check common installation paths
+    # Check common installation paths - prefer lldb-dap over codelldb
     common_paths = [
-        "/usr/local/bin/codelldb",
-        "/usr/bin/codelldb",
-        "/usr/local/bin/lldb-dap",
-        "/usr/bin/lldb-dap",
+        ("/usr/local/bin/lldb-dap", "lldb-dap"),
+        ("/usr/bin/lldb-dap", "lldb-dap"),
+        ("/usr/local/bin/codelldb", "codelldb"),
+        ("/usr/bin/codelldb", "codelldb"),
     ]
 
-    for path in common_paths:
+    for path, adapter_type in common_paths:
         if os.path.isfile(path) and os.access(path, os.X_OK):
-            return path
+            return path, adapter_type
 
-    return None
+    return None, ""
 
 
 @dataclass
@@ -167,6 +175,7 @@ class CodeLLDBAdapter(DebugAdapter):
         self._launched = False
         self._initialized_event: asyncio.Event | None = None
         self._codelldb_path: str | None = None
+        self._adapter_type: str = ""  # 'codelldb' or 'lldb-dap'
 
     @property
     def language(self) -> Language:
@@ -191,53 +200,64 @@ class CodeLLDBAdapter(DebugAdapter):
         return self._client
 
     async def initialize(self) -> dict[str, Any]:
-        """Start CodeLLDB and initialize DAP connection.
+        """Start CodeLLDB or lldb-dap and initialize DAP connection.
 
         Returns:
             Debug adapter capabilities
         """
-        # Find CodeLLDB
-        self._codelldb_path = _find_codelldb()
+        # Find CodeLLDB or lldb-dap
+        self._codelldb_path, self._adapter_type = _find_codelldb()
         if not self._codelldb_path:
             raise DAPConnectionError(
-                "CodeLLDB not found. Install options:\n"
+                "CodeLLDB or lldb-dap not found. Install options:\n"
                 "1. VS Code extension: vadimcn.vscode-lldb\n"
                 "2. From source: https://github.com/vadimcn/codelldb\n"
-                "3. Or install lldb-dap from LLVM"
+                "3. Install lldb-dap from LLVM: apt install lldb-17"
             )
-
-        # Get a free port for the DAP server
-        self._port = _get_free_port()
 
         try:
-            # Start CodeLLDB in DAP server mode
-            # CodeLLDB accepts --port to start in multi-session server mode
-            self._process = await asyncio.create_subprocess_exec(
-                self._codelldb_path,
-                "--port",
-                str(self._port),
-                stdin=asyncio.subprocess.DEVNULL,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
+            if self._adapter_type == "codelldb":
+                # CodeLLDB accepts --port to start in multi-session server mode
+                self._port = _get_free_port()
+                self._process = await asyncio.create_subprocess_exec(
+                    self._codelldb_path,
+                    "--port",
+                    str(self._port),
+                    stdin=asyncio.subprocess.DEVNULL,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
 
-            # Wait for the server to start
-            await asyncio.sleep(0.5)
+                # Wait for the server to start
+                await asyncio.sleep(0.5)
 
-            # Connect to the DAP server
-            for attempt in range(10):
-                try:
-                    self._reader, self._writer = await asyncio.wait_for(
-                        asyncio.open_connection("127.0.0.1", self._port),
-                        timeout=2.0,
-                    )
-                    break
-                except (ConnectionRefusedError, asyncio.TimeoutError):
-                    if attempt == 9:
-                        raise DAPConnectionError(
-                            f"Failed to connect to CodeLLDB on port {self._port}"
+                # Connect to the DAP server
+                for attempt in range(10):
+                    try:
+                        self._reader, self._writer = await asyncio.wait_for(
+                            asyncio.open_connection("127.0.0.1", self._port),
+                            timeout=2.0,
                         )
-                    await asyncio.sleep(0.3)
+                        break
+                    except (ConnectionRefusedError, asyncio.TimeoutError):
+                        if attempt == 9:
+                            raise DAPConnectionError(
+                                f"Failed to connect to CodeLLDB on port {self._port}"
+                            )
+                        await asyncio.sleep(0.3)
+            else:
+                # lldb-dap uses stdin/stdout for DAP communication
+                self._process = await asyncio.create_subprocess_exec(
+                    self._codelldb_path,
+                    stdin=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                # Use process stdin/stdout as reader/writer
+                assert self._process.stdout is not None
+                assert self._process.stdin is not None
+                self._reader = self._process.stdout
+                self._writer = self._process.stdin  # type: ignore[assignment]
 
             # Create DAP client
             assert self._reader is not None
@@ -267,12 +287,18 @@ class CodeLLDBAdapter(DebugAdapter):
             )
 
             self._initialized = True
-            logger.info(f"Session {self.session_id}: CodeLLDB initialized on port {self._port}")
+            adapter_name = "CodeLLDB" if self._adapter_type == "codelldb" else "lldb-dap"
+            if self._port:
+                logger.info(
+                    f"Session {self.session_id}: {adapter_name} initialized on port {self._port}"
+                )
+            else:
+                logger.info(f"Session {self.session_id}: {adapter_name} initialized via stdio")
             return self._capabilities
 
         except Exception as e:
             await self._cleanup()
-            raise DAPConnectionError(f"Failed to initialize CodeLLDB: {e}")
+            raise DAPConnectionError(f"Failed to initialize LLDB adapter: {e}")
 
     async def launch(
         self,
@@ -448,11 +474,13 @@ class CodeLLDBAdapter(DebugAdapter):
             self._reader = None
 
         if self._process:
-            self._process.terminate()
-            try:
-                await asyncio.wait_for(self._process.wait(), timeout=5.0)
-            except asyncio.TimeoutError:
-                self._process.kill()
+            # Check if process is still running before terminating
+            if self._process.returncode is None:
+                self._process.terminate()
+                try:
+                    await asyncio.wait_for(self._process.wait(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    self._process.kill()
             self._process = None
 
         self._initialized = False

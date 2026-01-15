@@ -1,0 +1,128 @@
+# Dockerfile for running all adapter tests
+# Includes Python, Node.js, Go, and Rust debug tools
+#
+# Build:
+#   docker build -f Dockerfile.test -t pybugger-mcp-test .
+#
+# Run (requires SYS_PTRACE for debuggers):
+#   docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined pybugger-mcp-test
+
+FROM python:3.11-slim-bookworm
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    build-essential \
+    ca-certificates \
+    gnupg \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install vscode-js-debug from VS Code Open VSX or GitHub
+# The js-debug is distributed as a VS Code extension, we extract the DAP server from it
+# Download from Open VSX (open source VS Code marketplace)
+RUN mkdir -p /opt/js-debug && cd /opt/js-debug \
+    && wget -q "https://open-vsx.org/api/nickg/js-debug-dap/latest/file/nickg.js-debug-dap-1.96.0.vsix" -O js-debug.vsix 2>/dev/null \
+    || wget -q "https://github.com/nickg/js-debug/releases/download/nightly/js-debug-dap.vsix" -O js-debug.vsix 2>/dev/null \
+    || true \
+    && if [ -f js-debug.vsix ]; then \
+         unzip -q js-debug.vsix -d extracted 2>/dev/null || true; \
+         if [ -d extracted/extension ]; then \
+           mv extracted/extension/* . 2>/dev/null || true; \
+         fi; \
+         rm -rf extracted js-debug.vsix; \
+       fi
+
+# Create js-debug wrapper script if the extension was extracted successfully
+RUN if [ -f /opt/js-debug/src/dapDebugServer.js ]; then \
+      echo '#!/bin/bash\nnode /opt/js-debug/src/dapDebugServer.js "$@"' > /usr/local/bin/js-debug \
+      && chmod +x /usr/local/bin/js-debug; \
+    fi
+
+# Install Go 1.24 (detect architecture) - required for delve 1.26+
+ENV GO_VERSION=1.24.3
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "arm64" ]; then GOARCH="arm64"; else GOARCH="amd64"; fi && \
+    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" | tar -C /usr/local -xzf -
+ENV PATH="/usr/local/go/bin:/root/go/bin:${PATH}"
+ENV GOPATH="/root/go"
+
+# Install delve debugger for Go
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+# Install Rust toolchain
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install LLVM 17+ which includes lldb-dap (the DAP server for LLDB)
+# We use LLVM's official apt repository to get a recent version
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends lsb-release software-properties-common \
+    && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc \
+    && echo "deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-17 main" >> /etc/apt/sources.list.d/llvm.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends lldb-17 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symlinks for lldb tools
+RUN ln -sf /usr/bin/lldb-17 /usr/local/bin/lldb \
+    && (ln -sf /usr/bin/lldb-dap-17 /usr/local/bin/lldb-dap 2>/dev/null || true) \
+    && (ln -sf /usr/bin/lldb-vscode-17 /usr/local/bin/lldb-dap 2>/dev/null || true)
+
+# Alternative: Download CodeLLDB from GitHub releases if lldb-dap is not available
+# Note: CodeLLDB architecture must match container architecture
+RUN if ! command -v lldb-dap &> /dev/null && ! command -v lldb-vscode &> /dev/null; then \
+      ARCH=$(dpkg --print-architecture) && \
+      if [ "$ARCH" = "arm64" ]; then CODELLDB_ARCH="aarch64"; else CODELLDB_ARCH="x86_64"; fi && \
+      mkdir -p /opt/codelldb \
+      && cd /opt/codelldb \
+      && wget -q "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-${CODELLDB_ARCH}-linux.vsix" -O codelldb.vsix 2>/dev/null \
+      && if [ -f codelldb.vsix ]; then \
+           unzip -q codelldb.vsix -d extracted 2>/dev/null || true; \
+           if [ -f extracted/extension/adapter/codelldb ]; then \
+             cp extracted/extension/adapter/codelldb /usr/local/bin/codelldb; \
+             chmod +x /usr/local/bin/codelldb; \
+             cp -r extracted/extension/adapter/lib* /usr/local/lib/ 2>/dev/null || true; \
+           fi; \
+           rm -rf extracted codelldb.vsix; \
+         fi; \
+    fi
+
+# Install Poetry for Python dependency management
+RUN pip install poetry
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml poetry.lock ./
+COPY README.md ./
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Install Python dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
+# Verify all tool installations
+RUN echo "=== Tool Verification ===" \
+    && echo "Python:" && python --version \
+    && echo "Node.js:" && node --version \
+    && echo "npm:" && npm --version \
+    && echo "Go:" && go version \
+    && echo "Delve:" && dlv version \
+    && echo "Rust:" && rustc --version \
+    && echo "Cargo:" && cargo --version \
+    && echo "LLDB:" && (lldb --version 2>/dev/null || echo "not found") \
+    && echo "js-debug:" && (which js-debug && echo "found" || echo "not found - Node.js tests will skip") \
+    && echo "lldb-dap:" && (which lldb-dap || which lldb-vscode || which codelldb || echo "not found - LLDB tests will skip")
+
+# Default command: run all adapter tests
+CMD ["pytest", "tests/e2e/test_adapter_python.py", "tests/e2e/test_adapter_node.py", "tests/e2e/test_adapter_go.py", "tests/e2e/test_adapter_rust.py", "-v", "--tb=short"]
