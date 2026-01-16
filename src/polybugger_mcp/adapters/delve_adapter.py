@@ -19,8 +19,12 @@ from typing import Any
 
 from polybugger_mcp.adapters.base import (
     AttachConfig as BaseAttachConfig,
+)
+from polybugger_mcp.adapters.base import (
     DebugAdapter,
     Language,
+)
+from polybugger_mcp.adapters.base import (
     LaunchConfig as BaseLaunchConfig,
 )
 from polybugger_mcp.adapters.dap_client import DAPClient

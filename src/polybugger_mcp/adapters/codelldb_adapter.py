@@ -25,8 +25,12 @@ from typing import Any
 
 from polybugger_mcp.adapters.base import (
     AttachConfig as BaseAttachConfig,
+)
+from polybugger_mcp.adapters.base import (
     DebugAdapter,
     Language,
+)
+from polybugger_mcp.adapters.base import (
     LaunchConfig as BaseLaunchConfig,
 )
 from polybugger_mcp.adapters.dap_client import DAPClient
@@ -89,9 +93,7 @@ def _find_codelldb() -> tuple[str | None, str]:
         # Find codelldb extension
         for ext in ext_dir.glob("vadimcn.vscode-lldb-*"):
             system = platform.system().lower()
-            if system == "darwin":
-                adapter = ext / "adapter" / "codelldb"
-            elif system == "linux":
+            if system == "darwin" or system == "linux":
                 adapter = ext / "adapter" / "codelldb"
             else:  # Windows
                 adapter = ext / "adapter" / "codelldb.exe"
@@ -257,7 +259,7 @@ class CodeLLDBAdapter(DebugAdapter):
                 assert self._process.stdout is not None
                 assert self._process.stdin is not None
                 self._reader = self._process.stdout
-                self._writer = self._process.stdin  # type: ignore[assignment]
+                self._writer = self._process.stdin
 
             # Create DAP client
             assert self._reader is not None

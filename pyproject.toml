@@ -140,6 +140,7 @@ known-first-party = ["polybugger_mcp"]
 "src/polybugger_mcp/api/errors.py" = ["ARG001"]  # FastAPI error handlers require request arg
 "src/polybugger_mcp/mcp_server.py" = ["ARG001"]  # FastMCP lifespan requires app arg
 "src/polybugger_mcp/models/requests.py" = ["ARG003"]  # Pydantic validator signature
+"src/polybugger_mcp/adapters/*.py" = ["ARG002"]  # Adapter interface methods have unused args
 
 # MyPy configuration
 [tool.mypy]

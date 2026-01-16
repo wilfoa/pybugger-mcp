@@ -19,7 +19,7 @@ class UnsupportedLanguageError(DebugRelayError):
         super().__init__(
             code="UNSUPPORTED_LANGUAGE",
             message=f"Language '{language}' is not supported",
-            details={"language": language, "supported": [l.value for l in Language]},
+            details={"language": language, "supported": [lang.value for lang in Language]},
         )
 
 
@@ -90,7 +90,7 @@ def get_supported_languages() -> list[str]:
     Returns:
         List of language strings that have registered adapters
     """
-    return [lang.value for lang in _ADAPTER_REGISTRY.keys()]
+    return [lang.value for lang in _ADAPTER_REGISTRY]
 
 
 def is_language_supported(language: str) -> bool:

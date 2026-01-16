@@ -24,8 +24,12 @@ from typing import Any
 
 from polybugger_mcp.adapters.base import (
     AttachConfig as BaseAttachConfig,
+)
+from polybugger_mcp.adapters.base import (
     DebugAdapter,
     Language,
+)
+from polybugger_mcp.adapters.base import (
     LaunchConfig as BaseLaunchConfig,
 )
 from polybugger_mcp.adapters.dap_client import DAPClient
@@ -156,7 +160,7 @@ class NodeAdapter(DebugAdapter):
             self._process = await asyncio.create_subprocess_exec(
                 js_debug_path,
                 "dap",
-                f"--host=127.0.0.1",
+                "--host=127.0.0.1",
                 f"--port={self._port}",
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
