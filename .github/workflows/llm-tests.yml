@@ -22,8 +22,7 @@ jobs:
   llm-e2e-tests:
     name: LLM Debugging Tests
     runs-on: ubuntu-latest
-    # Only run if API key is available
-    if: ${{ vars.ANTHROPIC_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
+    # Always run - tests will skip if ANTHROPIC_API_KEY is not set
     
     steps:
       - uses: actions/checkout@v4
@@ -55,7 +54,7 @@ jobs:
   llm-e2e-tests-native:
     name: LLM Tests (Native)
     runs-on: ubuntu-latest
-    if: ${{ vars.ANTHROPIC_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
+    # Always run - tests will skip if ANTHROPIC_API_KEY is not set
     
     steps:
       - uses: actions/checkout@v4
