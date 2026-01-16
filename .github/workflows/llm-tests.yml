@@ -1,6 +1,9 @@
 name: LLM E2E Tests
 
 on:
+  # Run on PRs to test before merge
+  pull_request:
+    branches: [main, master]
   # Run on push to main (after PR merge)
   push:
     branches: [main, master]
